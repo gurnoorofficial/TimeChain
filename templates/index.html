@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>⛓️ TimeChain Explorer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom, #e3f2fd, #ffffff);
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    header {
+      background-color: #1976d2;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    header span:first-child {
+      font-size: 36px;
+      font-weight: bold;
+    }
+    header span:last-child {
+      font-size: 24px;
+      margin-left: 10px;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      background-color: #fff;
+      border-bottom: 1px solid #ccc;
+      flex-wrap: wrap;
+    }
+    nav button {
+      padding: 12px 20px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-weight: bold;
+      color: #1976d2;
+    }
+    nav button.active {
+      border-bottom: 3px solid #1976d2;
+      color: #0d47a1;
+    }
+    section {
+      display: none;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+    section.active {
+      display: block;
+    }
+    textarea, input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    label {
+      font-weight: bold;
+      margin-top: 15px;
+      display: block;
+    }
+    pre {
+      background-color: #f1f1f1;
+      padding: 10px;
+      border-radius: 5px;
+      white-space: pre-wrap;
+    }
+    .block {
+      background: #fff;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-left: 5px solid #1976d2;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      border-radius: 4px;
+    }
+    .block strong {
+      color: #0d47a1;
+    }
+    .copy-btn {
+      background-color: #e0e0e0;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span>𝑳</span>
+    <span>TimeChain Blockchain Explorer</span>
+  </header>
+
+  <nav>
+    <button class="tab-btn active" data-tab="explorer">Explorer</button>
+    <button class="tab-btn" data-tab="add">Add Block</button>
+    <button class="tab-btn" data-tab="signer">Sign</button>
+    <button class="tab-btn" data-tab="keygen">Generate Key</button>
+    <button class="tab-btn" data-tab="verify">Verify</button>
+    <button class="tab-btn" data-tab="sigverify">Signature Check</button>
+  </nav>
+
+  <section id="explorer" class="active">
+    <h2>🧱 Block Explorer</h2>
+    <button class="action" onclick="downloadBlockchain()">⬇️ Download Blockchain</button>
+    <div id="chain"></div>
+  </section>
+
+  <section id="add">
+    <h2>➕ Add Block</h2>
+    <label>Message</label>
+    <textarea id="msg"></textarea>
+    <label>Signature</label>
+    <input id="sig" type="text" />
+    <button class="action" onclick="addBlock()">Add Block</button>
+    <pre id="status"></pre>
+  </section>
+
+  <section id="signer">
+    <h2>✍️ Sign Message</h2>
+    <label>Message</label>
+    <textarea id="sign-msg"></textarea>
+    <label>Private Key</label>
+    <input id="private-key" type="text" />
+    <button class="action" onclick="signMessage()">Generate</button>
+    <pre id="sign-result"></pre>
+  </section>
+
+  <section id="keygen">
+    <h2>🔐 Generate Ethereum Key</h2>
+    <button class="action" onclick="generateKey()">Generate</button>
+    <pre id="key-output"></pre>
+  </section>
+
+  <section id="verify">
+    <h2>✅ Verify Chain</h2>
+    <button class="action" onclick="verifyChain()">Verify</button>
+    <pre id="verify-result"></pre>
+  </section>
+
+  <section id="sigverify">
+    <h2>🔎 Signature Verification</h2>
+    <label>Message</label>
+    <textarea id="verify-msg"></textarea>
+    <label>Signature</label>
+    <input id="verify-sig" type="text" />
+    <button class="action" onclick="verifySignature()">Check</button>
+    <pre id="verify-sig-result"></pre>
+  </section>
+
+  <script>
+    document.querySelectorAll('.tab-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+        button.classList.add('active');
+        document.getElementById(button.dataset.tab).classList.add('active');
+      });
+    });
+
+    window.addEventListener('DOMContentLoaded', loadBlocks);
+
+    async function loadBlocks() {
+      const res = await fetch('/chain');
+      const data = await res.json();
+      const container = document.getElementById('chain');
+      if (!data.length) {
+        container.innerHTML = '<p>No blocks found.</p>';
+        return;
+      }
+      container.innerHTML = data.reverse().map(b => `
+        <div class="block">
+          <strong>Block #${b.index}</strong>
+          <button class="copy-btn" onclick="copyText(\`${b.message.replace(/`/g, '\\`')}\`)">Copy</button>
+          <pre>${b.message}</pre>
+          <div><strong>Timestamp:</strong> ${b.timestamp}</div>
+        </div>
+      `).join('');
+    }
+
+    function copyText(txt) {
+      navigator.clipboard.writeText(txt).then(() => {
+        alert("✅ Message copied exactly!");
+      });
+    }
+
+    async function addBlock() {
+      const message = document.getElementById('msg').value.trim();
+      const signature = document.getElementById('sig').value.trim();
+      const status = document.getElementById('status');
+      if (!message || !signature) {
+        status.textContent = '⚠️ Enter both message and signature.';
+        return;
+      }
+      try {
+        const res = await fetch('/add_block', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message, signature })
+        });
+        const json = await res.json();
+        status.textContent = res.ok ? `✅ Block #${json.index} added!` : `❌ ${json.error || 'Unknown error'}`;
+        if (res.ok) {
+          loadBlocks();
+          document.getElementById('msg').value = '';
+          document.getElementById('sig').value = '';
+        }
+      } catch (e) {
+        status.textContent = '❌ Network error: ' + e.message;
+      }
+    }
+
+    function signMessage() {
+      const msg = document.getElementById('sign-msg').value.trim();
+      const key = document.getElementById('private-key').value.trim();
+      if (!msg || !key) {
+        document.getElementById('sign-result').textContent = '⚠️ Enter message and private key.';
+        return;
+      }
+      if (!key.startsWith('0x') || key.length !== 66) {
+        document.getElementById('sign-result').textContent = '❌ Invalid private key.';
+        return;
+      }
+      try {
+        const wallet = new ethers.Wallet(key);
+        const timestamp = new Date().toISOString().split('.')[0];
+        const fullMessage = `${msg} ${timestamp}`;
+        wallet.signMessage(fullMessage).then(sig => {
+          document.getElementById('sign-result').textContent =
+            `Address: ${wallet.address}\nMessage: ${fullMessage}\nSignature: ${sig}`;
+          document.getElementById('msg').value = fullMessage;
+          document.getElementById('sig').value = sig;
+        });
+      } catch (e) {
+        document.getElementById('sign-result').textContent = '❌ ' + e.message;
+      }
+    }
+
+    function generateKey() {
+      const wallet = ethers.Wallet.createRandom();
+      document.getElementById('key-output').textContent =
+        `Address: ${wallet.address}\nPrivate Key: ${wallet.privateKey}`;
+    }
+
+    async function verifyChain() {
+      const out = document.getElementById('verify-result');
+      out.textContent = '⏳ Verifying...';
+      try {
+        const res = await fetch('/verify_chain');
+        const json = await res.json();
+        out.textContent = res.ok ? json.messages.join('\n') : '❌ ' + json.error;
+      } catch (e) {
+        out.textContent = '❌ Network error: ' + e.message;
+      }
+    }
+
+    async function verifySignature() {
+      const msg = document.getElementById('verify-msg').value.trim();
+      const sig = document.getElementById('verify-sig').value.trim();
+      const out = document.getElementById('verify-sig-result');
+      if (!msg || !sig) {
+        out.textContent = '⚠️ Enter message and signature.';
+        return;
+      }
+      try {
+        const addr = ethers.utils.verifyMessage(msg, sig);
+        out.textContent = `✅ Signature is valid. Recovered Address: ${addr}`;
+      } catch (e) {
+        out.textContent = '❌ ' + e.message;
+      }
+    }
+
+    async function downloadBlockchain() {
+      try {
+        const res = await fetch('/chain');
+        const data = await res.json();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'blockchain.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        alert('❌ Failed to download blockchain: ' + e.message);
+      }
+    }
+  </script>
+</body>
+</html>

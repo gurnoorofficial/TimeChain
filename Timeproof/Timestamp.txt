@@ -1,0 +1,16 @@
+[
+  {
+    "index": 0,
+    "message": "From Silence, Nature Speaks\nThis chain begins not with opinion, but with observation \u2014 and ends in breath\n\nBefore I said anything, there was silence.\nAnd in that silence, something began.\nNot with sound. Not with thought. But with a quiet shift inside.\nSome moments feel ordinary. Others feel like a change in direction \u2014 not loud, but certain.\n\nI didn\u2019t start with belief.\nI started with noticing.\nSomething small.\nSomething quiet.\nSomething that didn\u2019t need to explain itself.\n\nNature doesn\u2019t speak in words.\nIt doesn\u2019t try to be understood.\nIt grows. It fades. It moves forward.\nIt gives birth and death,\nbeginnings and endings \u2014\nand it does all of this without asking to be seen.\n\nSome moments feel like that.\nThey don\u2019t arrive with proof or noise.\nThey arrive in silence.\nIn the way a moment slows down.\nIn the way something ordinary suddenly feels like everything.\n\nThat\u2019s how this started.\nNot with answers.\nNot with plans.\nBut with a feeling that was steady enough to trust.\n\nThis is a sealed chain.\nIt didn\u2019t start with belief.\nIt started with that kind of noticing.\nIt does not grow.\nIt does not change.\nIt holds everything \u2014 past, present, and what will never be said.\n\nEvery 9 block speaks from a different place, but they all belong to one truth:\nWhat happened, happened. And nothing more is needed. 2025-06-29T05:00:00",
+    "eth_address": "0xd369bd534f678195f9341d2f55c80f7f9e56abb0",
+    "signature": "0x386f15de847ec918cf2ea94e61e20a3af2e216dbb3421e10d4eeed4ab367a3e133c5a3a4c9e34ac49cb66f9d49f0a6c0ba3916c73b9c61a7be61197129b1319d1c",
+    "timestamp": "2025-06-29T05:00:11",
+    "eth_block_number": 22807859,
+    "previous_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "hash": "7077fc28a8573e785ab1e8bc392d8096fdda787bca0c7aac5a857a17b1dd696c"
+  }
+]
+
+My Ethereum address:- 0xd369Bd534f678195F9341D2f55c80F7F9e56abb0
+Txn Hash:- 0x70926ecca5bfb6a79eda17b6c34fb4b302da583511934d74b2311d8e8db2ba97 #its include upper hash in input data
+Time now :- 30-June-2025
