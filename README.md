@@ -1,65 +1,71 @@
-TimeChain – Ethereum-Powered Message Blockchain
-TimeChain is a minimal blockchain system that lets anyone:
+# TimeChain – Ethereum-Powered Message Blockchain
 
-📝 Submit messages signed with Ethereum keys
+**TimeChain** is a minimal blockchain system that lets anyone:
 
-🔐 Store them immutably and irreversibly on a custom chain
-
-⏳ Anchor each block to a real Ethereum Mainnet block time
-
-🧾 Enforce trustless, time-proof logging of statements
-
-🚫 Prevent tampering, rewrites, or unauthorized inserts
+- 📝 Submit messages signed with Ethereum keys  
+- 🔐 Store them immutably and irreversibly on a custom chain  
+- ⏳ Anchor each block to a real Ethereum Mainnet block time  
+- 🧾 Enforce trustless, time-proof logging of statements  
+- 🚫 Prevent tampering, rewrites, or unauthorized inserts  
 
 Each message becomes part of a permanent public history — ideal for proof-of-existence, timestamping, declarations, or censorship-resistant records.
 
-✅ Key Features
-Ethereum Signature Verification
-Every message must be signed with a valid Ethereum private key.
+---
 
-Immutable Message Ledger
-Blocks cannot be altered once added — verified by Keccak-256 hashing.
+## ✅ Key Features
 
-Ethereum Time Anchoring
-Each block fetches a real Ethereum Mainnet timestamp and block number.
+- **Ethereum Signature Verification**  
+  Every message must be signed with a valid Ethereum private key.
 
-Fixed Maximum Blocks
-The chain accepts up to 10 blocks (configurable).
+- **Immutable Message Ledger**  
+  Blocks cannot be altered once added — verified by Keccak-256 hashing.
 
-Lightweight & Local
-No database required — messages are stored in blockchain.json.
+- **Ethereum Time Anchoring**  
+  Each block fetches a real Ethereum Mainnet timestamp and block number.
 
-🔐 Cryptographic Authorship, Forgery Resistance & Immutable Chain
+- **Fixed Maximum Blocks**  
+  The chain accepts up to 10 blocks (configurable).
+
+- **Lightweight & Local**  
+  No database required — messages are stored in `blockchain.json`.
+
+---
+
+## 🔐 Cryptographic Authorship, Forgery Resistance & Immutable Chain
+
 TimeChain ensures message authenticity, immutability, and tamper-proof permanence:
 
-Proves Ownership of Message
-Each block requires a valid Ethereum signature. Only the real owner of the private key can submit a valid message — no impersonation possible.
+- **Proves Ownership of Message**  
+  Each block requires a valid Ethereum signature. Only the real owner of the private key can submit a valid message — no impersonation possible.
 
-Detects Duplicates & Tampering
-Every block includes a Keccak-256 hash of its data. If any block is altered or copied dishonestly, verify_chain will catch it instantly.
+- **Detects Duplicates & Tampering**  
+  Every block includes a Keccak-256 hash of its data. If any block is altered or copied dishonestly, `verify_chain` will catch it instantly.
 
-Trustless & Auditable
-There is no admin or manual approval. All verification is done by cryptography and chain logic. Anyone can audit it.
+- **Trustless & Auditable**  
+  There is no admin or manual approval. All verification is done by cryptography and chain logic. Anyone can audit it.
 
-Dismisses Copy Attempts
-Messages are signed and anchored to real Ethereum block times, preventing replay or forgery.
+- **Dismisses Copy Attempts**  
+  Messages are signed and anchored to real Ethereum block times, preventing replay or forgery.
 
-Time-Proof and Permanent
-Each block is anchored to a real Ethereum Mainnet timestamp. Once written, it is forever bound to that moment — immutable and undeletable.
+- **Time-Proof and Permanent**  
+  Each block is anchored to a real Ethereum Mainnet timestamp. Once written, it is forever bound to that moment — immutable and undeletable.
 
-📦 Installation
-Requirements
-Python 3.10+
+---
 
-pip and venv for environment management
+## 📦 Installation
 
-Setup on Windows
+### Requirements
+
+- Python 3.10+  
+- `pip` and `venv` for environment management  
+
+### Setup on Windows
+
 Open Command Prompt (Windows + R, then type cmd).
 
 Change to a preferred drive (optional but recommended):
 
-bash
-Copy
+```bash
 cd /d D:\
 Clone the repository:
 
@@ -69,17 +75,17 @@ git clone https://github.com/gurnoorofficial/TimeChain.git
 cd TimeChain
 Create and activate a virtual environment:
 
-nginx
+bash
 Copy
 python -m venv venv
 venv\Scripts\activate
 Install required dependencies:
 
-nginx
+bash
 Copy
 pip install -r requirements.txt
 🛠️ Available Utilities
-After activating your virtual environment, you can use these scripts:
+After activating your virtual environment, you can run these scripts:
 
 ✍️ Sign Message (with timestamp)
 Generates an Ethereum signature with the current UTC timestamp included.
@@ -163,7 +169,7 @@ Route	Method	Description
 /verify_chain	GET	Validate all blocks + hashes
 
 📁 Project Structure
-graphql
+plaintext
 Copy
 TimeChain/
 ├── app.py                # Flask API and frontend logic
@@ -188,4 +194,3 @@ MIT License
 
 👤 Author
 Gurnoor Singh – https://github.com/gurnoorofficial
-
