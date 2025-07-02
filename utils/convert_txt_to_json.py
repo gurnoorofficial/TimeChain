@@ -1,5 +1,5 @@
-import json
 import os
+import json
 
 def txt_to_json(txt_path):
     if not os.path.isfile(txt_path):
@@ -20,5 +20,5 @@ def txt_to_json(txt_path):
     print(f"✅ Saved JSON to: {json_path}")
 
 if __name__ == "__main__":
-    path = input("📄 Enter path to .txt file: ").strip().strip('"').strip("'")
+    path = input("📄 Enter path to .txt file to convert to JSON: ").strip().strip('"').strip("'")
     txt_to_json(path)
