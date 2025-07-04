@@ -1,19 +1,27 @@
 from flask import Flask, request, jsonify, render_template
 from blockchain import (
     load_blockchain, save_blockchain, calculate_block_hash,
-    get_latest_eth_timestamp
+    get_latest_eth_timestamp, add_block as add_block_to_chain
 )
 from eth_account.messages import encode_defunct
 from eth_account import Account
 from datetime import datetime
+import os
+import pytz
 
+# === Use same folder as script ===
+script_dir = os.path.dirname(os.path.abspath(__file__))
+timechain_dir = script_dir
+AUDIT_LOG_PATH = os.path.join(timechain_dir, "auditiplog.txt")
+os.makedirs(timechain_dir, exist_ok=True)
+
+# === Flask app ===
 app = Flask(__name__, template_folder="templates")
-
-AUDIT_LOG_PATH = "/root/auditiplog"
 
 def log_visitor_ip():
     ip = request.headers.get('X-Real-IP', request.remote_addr)
-    now = datetime.utcnow().isoformat()
+    sydney_tz = pytz.timezone("Australia/Sydney")
+    now = datetime.now(sydney_tz).strftime("%Y-%m-%d %H:%M:%S %Z")  # Sydney local time
     log_entry = f"{now} - {ip}\n"
     try:
         with open(AUDIT_LOG_PATH, "a") as f:
@@ -51,39 +59,10 @@ def add_block():
         return jsonify({"error": "Invalid signature", "details": str(e)}), 400
 
     try:
-        chain = load_blockchain()
+        block = add_block_to_chain(message, signature, recovered_address)
+        return jsonify(block)
     except Exception as e:
-        return jsonify({"error": f"Failed to load blockchain: {str(e)}"}), 500
-
-    if len(chain) >= 10:  # ⬅️ Updated block limit
-        return jsonify({"error": "Chain has reached its limit (10 blocks)"}), 403
-
-    try:
-        timestamp, eth_block_number = get_latest_eth_timestamp()
-    except Exception as e:
-        return jsonify({"error": "Ethereum timestamp fetch failed", "details": str(e)}), 500
-
-    previous_hash = chain[-1]["hash"] if chain else "0" * 64
-
-    block_data = {
-        "index": len(chain),
-        "message": message,
-        "eth_address": recovered_address,
-        "signature": signature,
-        "timestamp": timestamp,
-        "eth_block_number": eth_block_number,
-        "previous_hash": previous_hash,
-    }
-
-    block_data["hash"] = calculate_block_hash(block_data)
-    chain.append(block_data)
-
-    try:
-        save_blockchain(chain)
-    except Exception as e:
-        return jsonify({"error": f"Failed to save block: {str(e)}"}), 500
-
-    return jsonify(block_data)
+        return jsonify({"error": f"Failed to add block: {str(e)}"}), 500
 
 @app.route("/verify_chain", methods=["GET"])
 def verify_chain():

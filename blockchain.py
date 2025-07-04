@@ -4,13 +4,18 @@ from datetime import datetime, timezone
 from eth_utils import keccak
 from web3 import Web3
 
-# === Constants ===
-BLOCKCHAIN_FILE = "/root/TimeChain/blockchain.json"
-FINGERPRINT_FILE = "/root/TimeChain/chain_fingerprint.txt"
+# === Use same folder as script ===
+script_dir = os.path.dirname(os.path.abspath(__file__))
+timechain_dir = script_dir
+BLOCKCHAIN_FILE = os.path.join(timechain_dir, "blockchain.json")
+FINGERPRINT_FILE = os.path.join(timechain_dir, "chain_fingerprint.txt")
+os.makedirs(timechain_dir, exist_ok=True)
+
+# === Ethereum setup ===
 INFURA_URL = "https://mainnet.infura.io/v3/e8740e4245d64df0bb6d7966a77255c3"
 w3 = Web3(Web3.HTTPProvider(INFURA_URL))
 
-MAX_BLOCKS = 10  # ⬅️ New max block limit
+MAX_BLOCKS = 10
 
 def keccak_hash(data):
     return keccak(data.encode() if isinstance(data, str) else data).hex()
@@ -60,30 +65,37 @@ def load_blockchain():
     return chain
 
 def save_chain_fingerprint(chain):
-    with open(FINGERPRINT_FILE, "w") as f:
-        f.write(chain[-1]["hash"])
+    if "hash" in chain[-1]:
+        with open(FINGERPRINT_FILE, "w") as f:
+            f.write(chain[-1]["hash"])
 
 def save_blockchain(chain):
     with open(BLOCKCHAIN_FILE, "w") as f:
         json.dump(chain, f, indent=2)
     save_chain_fingerprint(chain)
 
-def add_block(message, signature):
+def get_latest_eth_timestamp():
+    block = w3.eth.get_block('latest')
+    block_time = datetime.fromtimestamp(block["timestamp"], timezone.utc).replace(tzinfo=None).isoformat()
+    return block_time, block["number"]
+
+def add_block(message, signature, eth_address):
     chain = load_blockchain()
     if len(chain) >= MAX_BLOCKS:
         raise ValueError(f"❌ Maximum number of blocks ({MAX_BLOCKS}) reached.")
 
     message = normalize_message(message)
     index = len(chain)
-    timestamp, eth_block = get_latest_eth_timestamp()
+    timestamp, eth_block_number = get_latest_eth_timestamp()
     previous_hash = calculate_block_hash(chain[-1]) if chain else "0"
 
     new_block = {
         "index": index,
         "message": message,
-        "timestamp": timestamp,
-        "eth_block": eth_block,
+        "eth_address": eth_address,
         "signature": signature,
+        "timestamp": timestamp,
+        "eth_block_number": eth_block_number,
         "previous_hash": previous_hash
     }
     new_block["hash"] = calculate_block_hash(new_block)
@@ -91,12 +103,3 @@ def add_block(message, signature):
     chain.append(new_block)
     save_blockchain(chain)
     return new_block
-
-def get_latest_eth_timestamp():
-    block = w3.eth.get_block('latest')
-    block_time = datetime.fromtimestamp(block["timestamp"], timezone.utc).replace(tzinfo=None).isoformat()
-    return block_time, block["number"]
-
-def eth_signed_message(message):
-    prefix = f"\x19Ethereum Signed Message:\n{len(message)}"
-    return (prefix + message).encode()
