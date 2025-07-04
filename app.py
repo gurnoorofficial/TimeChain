@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from flask import Flask, request, jsonify, render_template
 from blockchain import (
     load_blockchain, save_blockchain, calculate_block_hash,
@@ -8,6 +9,7 @@ from eth_account import Account
 from datetime import datetime
 import os
 import pytz
+import re
 
 # === Use same folder as script ===
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -18,13 +20,49 @@ os.makedirs(timechain_dir, exist_ok=True)
 # === Flask app ===
 app = Flask(__name__, template_folder="templates")
 
+def parse_user_agent(ua):
+    ua = ua.lower()
+    platform = "Unknown"
+    browser = "Unknown"
+    version = ""
+
+    if "windows" in ua:
+        platform = "Windows"
+    elif "iphone" in ua:
+        platform = "iPhone"
+    elif "ipad" in ua:
+        platform = "iPad"
+    elif "android" in ua:
+        platform = "Android"
+    elif "mac os x" in ua:
+        platform = "Mac"
+
+    # Common browsers
+    match = re.search(r"(chrome|firefox|safari|edg|opera)[/\s]?([\d\.]+)", ua)
+    if match:
+        b, v = match.groups()
+        browser = {
+            "chrome": "Chrome",
+            "firefox": "Firefox",
+            "safari": "Safari",
+            "edg": "Edge",
+            "opera": "Opera"
+        }.get(b, b.capitalize())
+        version = v
+
+    return platform, browser, version
+
 def log_visitor_ip():
     ip = request.headers.get('X-Real-IP', request.remote_addr)
+    user_agent = request.headers.get('User-Agent', 'Unknown')
+    platform, browser, version = parse_user_agent(user_agent)
+
     sydney_tz = pytz.timezone("Australia/Sydney")
-    now = datetime.now(sydney_tz).strftime("%Y-%m-%d %H:%M:%S %Z")  # Sydney local time
-    log_entry = f"{now} - {ip}\n"
+    now = datetime.now(sydney_tz).strftime("%Y-%m-%d %H:%M:%S %Z")
+    log_entry = f"{now} - {ip} - {platform} - {browser} {version}\n"
+
     try:
-        with open(AUDIT_LOG_PATH, "a") as f:
+        with open(AUDIT_LOG_PATH, "a", encoding="utf-8") as f:
             f.write(log_entry)
     except Exception as e:
         print(f"⚠️ Failed to write audit log: {e}")
@@ -79,17 +117,16 @@ def verify_chain():
     messages = []
 
     for i, block in enumerate(chain):
-        index = i
-        if block["index"] != index:
-            messages.append(f"❌ Block {index}: Incorrect index")
+        if block["index"] != i:
+            messages.append(f"❌ Block {i}: Incorrect index")
             errors += 1
 
         if i > 0 and block["previous_hash"] != chain[i - 1]["hash"]:
-            messages.append(f"❌ Block {index}: Previous hash mismatch")
+            messages.append(f"❌ Block {i}: Previous hash mismatch")
             errors += 1
 
         if calculate_block_hash(block) != block["hash"]:
-            messages.append(f"❌ Block {index}: Hash mismatch")
+            messages.append(f"❌ Block {i}: Hash mismatch")
             errors += 1
 
     if errors == 0:
